@@ -1,0 +1,8 @@
+Figure 1. Confirmation PR-AUC. The prespecified macro within-robot B5-B4
+difference is positive, but its conditional bootstrap confidence interval
+includes zero.
+
+Figure 2. Repeated-confirmation summary. (a) B5 has a small positive PR-AUC
+point difference on both robots. (b) First-failure composition differs by
+robot. (c) Phase-resolved and phase-agnostic variants are tied. (d) B5 yields
+no rollout-budget advantage (lower is better).

@@ -1,0 +1,3 @@
+Egor Zharinov studied at Moscow Institute of Physics and Technology (National
+Research University). His research interests include humanoid locomotion,
+whole-body robot dynamics, feasibility analysis, and reproducible simulation.

@@ -1,0 +1,17 @@
+This archive contains the code and evidence for the paper's repeated
+humanoid gait failure-ranking confirmation.
+
+Contents:
+
+- two development CSV files (100 rows each);
+- two untouched confirmation CSVs (800 rows total; 400 per robot);
+- all per-case checkpoints, protocols, hashes, and validity reports;
+- the fixed B1--B5 analysis and paired 10,000-resample conditional bootstrap;
+- the two manuscript figures, regenerated directly from the analysis JSON;
+- one H.264 video showing successful and failed closed-loop rollouts for both
+  robots;
+- exact environment files, runnable source, checks, and license notices.
+
+The frozen gate fails because the interval crosses zero. The paper is
+self-contained; this archive adds reproducibility and visual inspection, not
+supplemental claims.

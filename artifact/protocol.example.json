@@ -1,0 +1,187 @@
+{
+  "status": "template_not_results",
+  "study_revision": 2,
+  "prior_pilot": "archived_exploratory_not_reused",
+  "seed": 2026,
+  "robots": ["talos", "icub"],
+  "trajectory": {
+    "steps": 6,
+    "frequency_hz": 100,
+    "cartesian_foot_reference": "endpoint_C2_polynomial_blend",
+    "configuration_reference": "warm_started_bounded_manifold_IK",
+    "velocity_acceleration_reference": "manifold_finite_difference_then_rigid_contact_projection",
+    "globally_C2_configuration_claim": false
+  },
+  "pilot_rollouts_per_robot": 200,
+  "id_base_gaits_per_robot": {
+    "train": 500,
+    "tune": 150,
+    "calibration": 450,
+    "test": 600
+  },
+  "ood_base_gaits_per_robot": 200,
+  "sampling_design": {
+    "pilot": {
+      "design": "independently_permuted_scrambled_sobol",
+      "perturbations_per_base_gait": 1
+    },
+    "train": {
+      "design": "independently_permuted_scrambled_sobol_grouped",
+      "perturbations_per_base_gait": 3
+    },
+    "tune": {
+      "design": "independently_permuted_scrambled_sobol_grouped",
+      "perturbations_per_base_gait": 3
+    },
+    "calibration": {
+      "design": "iid_joint_gait_perturbation",
+      "unique_sequences_per_robot": 450,
+      "unique_base_gait_per_sequence": true,
+      "perturbations_per_base_gait": 1,
+      "formal_binomial_inference": true
+    },
+    "test": {
+      "design": "iid_joint_gait_perturbation",
+      "unique_sequences_per_robot": 600,
+      "unique_base_gait_per_sequence": true,
+      "perturbations_per_base_gait": 1,
+      "formal_binomial_inference": true
+    },
+    "ood": {
+      "design": "independently_permuted_scrambled_sobol_grouped",
+      "perturbations_per_base_gait": 3,
+      "formal_clopper_pearson_guarantee": false
+    },
+    "cross_design_gate": "per_slot_absolute_Pearson_correlation_below_0.25_diagnostic_only"
+  },
+  "main_sequences_per_robot": 3600,
+  "main_sequences_both_robots": 7200,
+  "threshold_grid_size": 50,
+  "false_safe_target": 0.05,
+  "familywise_alpha": 0.05,
+  "screening": {
+    "design": "independently_permuted_scrambled_sobol",
+    "pool_size": 2048,
+    "budgets": [5, 10, 20],
+    "paired_seeds": 30,
+    "final_rollout_verification_required": true
+  },
+  "gait_domain_normalized": {
+    "step_length_L": [0.10, 0.40],
+    "step_width_scale_rho_w": [0.85, 1.15],
+    "step_width_definition": "w = rho_w * w0",
+    "w0_definition": "neutral lateral sole-center separation",
+    "width_protocol_correction": {
+      "status": "frozen_before_pilot",
+      "selected_from_pilot_outcomes": false,
+      "single_prespecified_post_pilot_subrange_rule_still_applies": true
+    },
+    "single_support_T": [1.4, 2.8],
+    "double_support_T": [0.2, 0.8],
+    "com_height_scale": [0.90, 1.05],
+    "zmp_bias_half_sole": [-0.25, 0.25]
+  },
+  "robot_model_preprocessing": {
+    "icub_model": "official example_robot_data icub_reduced URDF with neck pitch, roll, and yaw locked",
+    "armature_floor": "1e-8 * robot_mass * leg_length^2",
+    "collision_mesh_axes": "normalize_COLLADA_Y_UP_to_Z_UP",
+    "neutral_sole_leveling": "bounded ankle pitch/roll solve making both sole z axes world vertical",
+    "sole_footprint": {
+      "source": "convex_hull_of_manually_verified_lowest_near_horizontal_collision_mesh_triangles",
+      "talos_skin_height_tolerance_m": 0.002,
+      "icub_skin_height_tolerance_m": 0.0001,
+      "conservative_inset": "homothetic_about_area_centroid_by_at_least_skin_height_tolerance",
+      "manual_geometry_review_required": true
+    },
+    "contact_wrench_frame": "local_world_aligned_with_ground_vertical_z",
+    "icub_neutral_joint_overrides_rad": {
+      "l_shoulder_roll": 0.5,
+      "r_shoulder_roll": 0.5
+    },
+    "icub_explicit_adjacent_collision_exclusions": 32
+  },
+  "physics_signature": {
+    "inverse_dynamics_lp": {
+      "stages": 2,
+      "exact_equalities": [
+        "rigid_body_dynamics",
+        "acceleration_level_rigid_contact"
+      ],
+      "primary_objective": "normalized_L1_acceleration_tracking_slack",
+      "secondary_objective": "normalized_L1_effort_and_contact_wrench",
+      "slack_feature_name": "dynamics_slack"
+    },
+    "touchdown_proxy": {
+      "definition": "preimpact_speed_at_timing_shifted_touchdown_over_sqrt_gL_plus_normalized_disturbance",
+      "physical_impact_impulse_estimate": false
+    }
+  },
+  "rollout_oracle": {
+    "relationship": "separate_rollout_based_labeler_sharing_nominal_inverse_dynamics_and_using_adaptive_unilateral_realized_contacts",
+    "controller_demand": "contact_constrained_inverse_dynamics_without_effort_bounds",
+    "applied_command": "second_contact_constrained_solve_with_effort_bounds",
+    "componentwise_torque_clipping": false,
+    "continuous_normal_force_tolerance": "1e-6 * plant_mass * g",
+    "continuous_cop_tolerance": "1e-4 * leg_length",
+    "continuous_liftoff": {
+      "precondition": "two active contacts and at least one continuous normal_force/friction/CoP violation",
+      "candidate_search": "remove one violating sole at a time in fixed left-right order",
+      "retained_contact_requirement": "finite dynamics with normalized residual below 1e-7 and no normal_force/friction/CoP violation",
+      "predicted_free_normal_velocity_min": "1e-4 * sqrt(g * leg_length)",
+      "current_and_next_gap_min": "-1e-3 * leg_length",
+      "maximum_predicted_gap_closure": "1e-5 * leg_length",
+      "persistence": "released soles remain suppressed while desired until downward physical recontact"
+    },
+    "external_horizontal_impulse": {
+      "application": "one_step_world_frame_force_pulse_at_mid_single_support",
+      "momentum_integral": "plant_mass * sqrt(g * leg_length) * normalized_impulse",
+      "touchdown_impulse_solver_reused": false
+    },
+    "impact": {
+      "solver": "Pinocchio_6D_impulseDynamics_active_set_then_PointContact_ADMM_NCP",
+      "contact_mode": "perfectly_inelastic_sticking_when_feasible_with_unilateral_Coulomb_sliding_fallback_for_nonseparating_candidates",
+      "candidate_contacts": "all_timing_shifted_reference_contacts_not_currently_suppressed",
+      "sticking_subset_search": "all_nonempty_subsets",
+      "sliding_fallback_precondition": "at_least_one_candidate_preimpact_normal_velocity_is_not_separating_beyond_tolerance",
+      "sliding_fallback_points": "all_reviewed_sole_polygon_vertices_in_world_ground_aligned_frames",
+      "point_friction_cone": "circular_Coulomb_cone",
+      "admm_iteration_tolerance": 5e-9,
+      "admm_validation_residual_max": 1e-8,
+      "tensile_impulse_tolerance": "1e-8 * max(robot_mass * sqrt(g * leg_length), 1)",
+      "cop_definition": "normal_impulse_weighted_pressure_center_of_vertex_contacts",
+      "cop_tolerance": "1e-4 * leg_length",
+      "normalized_momentum_residual_max": 1e-10,
+      "postimpact_kinetic_energy_increase_tolerance": "1e-10 * max(robot_mass * g * leg_length, 1)",
+      "sticking_active_contact_6d_velocity_residual_max": "1e-4 * sqrt(g * leg_length)",
+      "fallback_vertex_normal_velocity_min": "-1e-4 * sqrt(g * leg_length)",
+      "unselected_contact_normal_velocity_min": "-1e-4 * sqrt(g * leg_length)",
+      "sticking_selection": "minimum_postimpact_kinetic_energy_then_more_contacts",
+      "persistence": "impact-unselected candidate soles remain suppressed while desired until physical recontact; desired-mode changes may also release contacts"
+    },
+    "early_touchdown": {
+      "swing_was_airborne_height": "0.005 * leg_length",
+      "ground_height_tolerance": "1e-6 * leg_length",
+      "minimum_downward_speed": "1e-6 * sqrt(g * leg_length)"
+    },
+    "penetration_failure_depth": "1e-3 * leg_length",
+    "contact_schedule_audit": [
+      "actual_single_support_fraction",
+      "actual_double_support_fraction",
+      "contact_schedule_match_fraction"
+    ],
+    "scheduled_double_support_is_not_forced": true,
+    "final_rollout_verification_required": true
+  },
+  "id_perturbations": {
+    "friction": [0.4, 0.8],
+    "payload_mass_fraction": [0.0, 0.10],
+    "timing_error_s": [-0.02, 0.02],
+    "horizontal_impulse_normalized": [0.0, 0.04]
+  },
+  "ood_perturbations": {
+    "friction_intervals": [[0.25, 0.40], [0.80, 0.90]],
+    "payload_mass_fraction": [0.10, 0.15],
+    "absolute_timing_error_s": [0.02, 0.04],
+    "horizontal_impulse_normalized": [0.04, 0.08]
+  }
+}

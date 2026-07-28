@@ -1,0 +1,12 @@
+Third-party software and robot descriptions
+
+The artifact source uses Pinocchio, example-robot-data, NumPy, SciPy,
+scikit-learn, Matplotlib, FFmpeg, and their transitive dependencies under their
+respective licenses. Exact Python and Conda package versions are recorded in
+the environment lock; video regeneration additionally requires a system FFmpeg
+executable.
+
+TALOS and iCub descriptions and meshes are loaded at runtime from
+example-robot-data. They are not redistributed in this archive. This project's
+BSD-3-Clause license and data license do not replace or modify any third-party
+license or trademark.

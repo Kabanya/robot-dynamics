@@ -1,0 +1,26 @@
+{
+  "cases": {
+    "icub": {
+      "failure": {
+        "base_gait_id": "icub-pilot-000036",
+        "seed": 654855375
+      },
+      "success": {
+        "base_gait_id": "icub-pilot-000120",
+        "seed": 1890735925
+      }
+    },
+    "talos": {
+      "failure": {
+        "base_gait_id": "talos-pilot-000094",
+        "seed": 2460860579
+      },
+      "success": {
+        "base_gait_id": "talos-pilot-000045",
+        "seed": 4288005355
+      }
+    }
+  },
+  "sha256": "24dc2704c9c9f29c1863d2b5fb35802efbfbf2f19a12dcd8c5268b50bab18eee",
+  "video": "rollout_examples.mp4"
+}

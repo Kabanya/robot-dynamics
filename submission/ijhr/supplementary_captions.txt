@@ -1,0 +1,7 @@
+Supplementary Artifact S1 — Reproducibility package containing the frozen
+development and confirmation records, validity reports, environment and source
+fingerprints, fixed analysis code, tests, and deterministic manuscript figures.
+
+Supplementary Video V1 — Representative successful and failed closed-loop
+rollouts for TALOS and iCub. Labels identify the robot and first failure type.
+The simplified display geometry is not used by the rollout oracle or analysis.
